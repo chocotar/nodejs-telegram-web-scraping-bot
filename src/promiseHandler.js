@@ -13,9 +13,8 @@ const findPromiseHandler = (bot, chatId, messageId, query) => {
   return (url => {
     if (url.result) {
       if (url.reason == 'keyboard') {
-        const sendKeyboard = inlineKeyboard(url.result)
-        bot.deleteMessage(chatId, messageId)
-        bot.sendMessage(chatId, query, opts(true, url.result));
+        console.log(url.result)
+        // bot.sendMessage(chatId, query, opts(true, url.result));
       } else {
         console.log(`Got: ${url.result}`)
         getLink(url.result)
