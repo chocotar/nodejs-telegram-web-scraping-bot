@@ -10,35 +10,33 @@ const { getLink } = require('./api');
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {polling: true});
-const opts = {
-  // reply_markup:{
-  //   keyboard: [ ['FAQ'], ['Buy'] ] // add keyboard response text
-  // },
-  parse_mode: 'HTML'
-};
+const htmlParse = { parse_mode: 'HTML' }
+
 const app = express()
 
 // Matches "/find [whatever]"
 bot.onText(/\/find (.+)/, (msg, match) => {
 
   const chatId = msg.chat.id;
+  const messageId = msg.message_id
   const resp = match[1]; // the captured "whatever"
 
-  bot.sendMessage(chatId, `<b>Finding:</b> <i>${resp}</i>`, opts);
+  bot.sendMessage(chatId, `<b>Finding:</b> <i>${resp}</i>`, htmlParse);
   // start to find
-  search(resp).then(findPromiseHandler(bot, chatId, opts)).catch(errorHandler(bot, chatId, opts))
+  search(resp).then(findPromiseHandler(bot, chatId, messageId, resp)).catch(errorHandler(bot, chatId))
 });
 
 bot.onText(/\/scrape (.+)/, (msg, match) => {
-  console.log(msg)
+  
   const chatId = msg.chat.id;
+  const messageId = msg.message_id
   const resp = match[1]
 
-  bot.sendMessage(chatId, `<b>Scraping:</b> <i>${resp}</i>`, opts);
+  bot.sendMessage(chatId, `<b>Scraping:</b> <i>${resp}</i>`, htmlParse);
 
   getLink(resp)
-    .then(scrapePromiseHandler(bot, chatId, opts, resp))
-    .catch(errorHandler(bot, chatId, opts))
+    .then(scrapePromiseHandler(bot, chatId, messageId, resp))
+    .catch(errorHandler(bot, chatId))
 });
 
 bot.on('polling_error', (error) => {
