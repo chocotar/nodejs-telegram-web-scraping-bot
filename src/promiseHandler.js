@@ -2,27 +2,34 @@ const cheerio = require('cheerio');
 const { getLink } = require('./api');
 const { writeData } = require('./createData');
 
-const errorHandler = (bot, chatId, opts) => {
+const errorHandler = (bot, chatId) => {
   return (err => {
     console.log(err)
-    bot.sendMessage(chatId, err.Erorr, opts)
+    bot.sendMessage(chatId, err.code, opts())
   });
 };
 
-const findPromiseHandler = (bot, chatId, opts) => {
+const findPromiseHandler = (bot, chatId, messageId, query) => {
   return (url => {
     if (url.result) {
-      console.log(`Got: ${url.result}`)
-      getLink(url.result)
-        .then(scrapePromiseHandler(bot, chatId, opts, url.result))
-        .catch(errorHandler(bot, chatId, opts))
-    }else {
-      bot.sendMessage(chatId, url.reason, opts);
+      if (url.reason == 'keyboard') {
+        const sendKeyboard = inlineKeyboard(url.result)
+        bot.deleteMessage(chatId, messageId)
+        bot.sendMessage(chatId, query, opts(true, url.result));
+      } else {
+        console.log(`Got: ${url.result}`)
+        getLink(url.result)
+          .then(scrapePromiseHandler(bot, chatId, url.result))
+          .catch(errorHandler(bot, chatId)
+      }
+    } else {
+      bot.deleteMessage(chatId, messageId)
+      bot.sendMessage(chatId, url.reason, opts());
     }
   });
 };
 
-const scrapePromiseHandler = (bot, chatId, opts, url) => {
+const scrapePromiseHandler = (bot, chatId, messageId, url) => {
   const mainPageCheck = isMainPageUrl(url)
   const isCreateData = process.env.CREATE_DATA || false
   let str
@@ -48,19 +55,38 @@ const scrapePromiseHandler = (bot, chatId, opts, url) => {
         toWriteData(name, links, isCreateData)
         const rLinks = links.join(`\n\n<b>Another part:</b> `)
         str = `<b>Name:</b> ${name}\n\n<b>Link part 1:</b> ${rLinks}`
-        bot.sendMessage(chatId, str, opts);
+        bot.deleteMessage(chatId, messageId)
+        bot.sendMessage(chatId, str, opts());
       }else {
         console.log(link)
         toWriteData(name, link, isCreateData)
         str = `<b>Name:</b> ${name}\n\n<b>Link:</b> ${link}`
-        bot.sendMessage(chatId, str, opts);
+        bot.deleteMessage(chatId, messageId)
+        bot.sendMessage(chatId, str, opts());
       }
     })
   }else {
-    str = `${url} is not main page`
-    bot.sendMessage(chatId, str, opts);
+    str = `<i>${url}</i> is not main page`
+    bot.deleteMessage(chatId, messageId)
+    bot.sendMessage(chatId, str, opts());
   }
 };
+
+const inlineKeyboard = (text) => {
+  return text.map( (e) => e.split(','))
+}
+
+const opts = (isKeyboard=false, query=null) => {
+  if (isKeyboard) {
+    return {
+      reply_markup:{
+        keyboard: query
+      },
+        parse_mode: 'HTML'
+    };
+  }
+  return { parse_mode: 'HTML'}
+}
 
 const isMainPageUrl = url => {
   return url.match(/.+(anh\/|videos\/|video\/)$/i)
