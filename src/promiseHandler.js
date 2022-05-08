@@ -13,8 +13,8 @@ const findPromiseHandler = (bot, chatId, messageId, query) => {
   return (url => {
     if (url.result) {
       if (url.reason == 'keyboard') {
-        console.log(url.result)
-        // bot.sendMessage(chatId, query, opts(true, url.result));
+        const getName = inlineKeyboard(true, url.result)
+        bot.sendMessage(chatId, query, opts(true, getName));
       } else {
         console.log(`Got: ${url.result}`)
         getLink(url.result)
@@ -72,7 +72,7 @@ const scrapePromiseHandler = (bot, chatId, messageId, url) => {
 };
 
 const inlineKeyboard = (text) => {
-  return text.map( (e) => e.split(','))
+  return text.map( (e) => [e.name] )
 }
 
 const opts = (isKeyboard=false, query=null) => {
