@@ -30,6 +30,7 @@ bot.onText(/\/find (.+)/, (msg, match) => {
 });
 
 bot.onText(/\/scrape (.+)/, (msg, match) => {
+  console.log(msg)
   const chatId = msg.chat.id;
   const resp = match[1]
 
