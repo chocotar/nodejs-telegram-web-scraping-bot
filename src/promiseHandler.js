@@ -20,7 +20,7 @@ const findPromiseHandler = (bot, chatId, messageId, query) => {
         console.log(`Got: ${url.result}`)
         getLink(url.result)
           .then(scrapePromiseHandler(bot, chatId, url.result))
-          .catch(errorHandler(bot, chatId)
+          .catch(errorHandler(bot, chatId))
       }
     } else {
       bot.deleteMessage(chatId, messageId)
