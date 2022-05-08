@@ -109,7 +109,7 @@ async function search(query) {
           if (isMainPageUrl(linkResult)) {
             return found(linkResult, "Success")
           } else {
-            return found(undefined, "<b>Failed to get main page url</b>")
+            return found(linksArr, "keyboard")
           }
         }
       }
