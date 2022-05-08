@@ -13,7 +13,7 @@ const findPromiseHandler = (bot, chatId, messageId, query) => {
   return (url => {
     if (url.result) {
       if (url.reason == 'keyboard') {
-        const getName = inlineKeyboard(true, url.result)
+        const getName = inlineKeyboard(url.result)
         bot.sendMessage(chatId, query, opts(true, getName));
       } else {
         console.log(`Got: ${url.result}`)
